@@ -1,13 +1,18 @@
 import nested_dict as nd
+import xml.etree.ElementTree as ET
+
 
 f = open('ekaterinburg.txt', 'r', encoding="utf-8")
 new_dictionary = nd.nested_dict()
-count = 0
+
+#tree = ET.parse('ekaterinburg.txt')
+#root = tree.getroot()
+#for child in tree:
+    #print(child.tag, child.attrib, child.text)
 
 
 for line in f:
     if "id" in line and "lat" in line and "lon" in line:
-        count += 1
         k = int(line.find("id"))
         d = int(line.find("lat"))
         t = int(line.find("lon"))
