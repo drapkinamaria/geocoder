@@ -1,23 +1,33 @@
-import nested_dict as nd
-import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import XML
+from files import read_file
+from collections import defaultdict
 
 
-f = open('ekaterinburg.txt', 'r', encoding="utf-8")
-new_dictionary = nd.nested_dict()
+def etree_to_dict(t):
+    d = {t.tag: {} if t.attrib else None}
+    children = list(t)
+    if children:
+        dd = defaultdict(list)
+        for dc in map(etree_to_dict, children):
+            for k, v in dc.items():
+                dd[k].append(v)
+        d = {t.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
+    if t.attrib:
+        d[t.tag].update(("@" + k, v) for k, v in t.attrib.items())
+    if t.text:
+        text = t.text.strip()
+        if children or t.attrib:
+            if text:
+                d[t.tag]["#text"] = text
+        else:
+            d[t.tag] = text
+    return d
 
-#tree = ET.parse('ekaterinburg.txt')
-#root = tree.getroot()
-#for child in tree:
-    #print(child.tag, child.attrib, child.text)
+
+def main():
+    f = read_file("ekaterinburg.txt")
+    data = etree_to_dict(XML(f))
 
 
-for line in f:
-    if "id" in line and "lat" in line and "lon" in line:
-        k = int(line.find("id"))
-        d = int(line.find("lat"))
-        t = int(line.find("lon"))
-        id = line[k + 4: k + 13]
-        lat = line[d + 5: d + 15]
-        lan = line[t + 5: t + 15]
-        new_dictionary[lat][lan] = id
-print(new_dictionary)
+if __name__ == '__main__':
+    main()
