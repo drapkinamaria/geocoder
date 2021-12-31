@@ -1,7 +1,3 @@
-import re
-from collections import defaultdict
-from xml.etree.ElementTree import XML
-
 from files import read_file
 import nested_dict as nd
 
@@ -20,43 +16,13 @@ def get_nodes(lines):
     return new_dictionary
 
 
-def etree_to_dict(t):
-    d = {t.tag: {} if t.attrib else None}
-    children = list(t)
-    if children:
-        dd = defaultdict(list)
-        for dc in map(etree_to_dict, children):
-            for k, v in dc.items():
-                dd[k].append(v)
-        d = {t.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
-    if t.attrib:
-        d[t.tag].update((k, v) for k, v in t.attrib.items())
-    if t.text:
-        text = t.text.strip()
-        if children or t.attrib:
-            if text:
-                d[t.tag]["#text"] = text
-        else:
-            d[t.tag] = text
-    return d
-
-
-def simplify_nodes_ids(nds):
-    if len(nds) == 1:
-        return [nds['ref']]
-    result = []
-    for i in nds:
-        result.append(i['ref'])
-    return result
-
-
 def get_way(row, text):
     local_text = text[text.find("<way "):text.rfind("</way>")]
     for way in local_text.split("</way>"):
-        all_exists = True
+        all_exists = False
         for i in row.split():
-            if i not in way:
-                all_exists = False
+            if i not in way[way.find("<tag"):way.rfind("</tag")]:
+                all_exists = True
                 break
         if all_exists:
             return way
@@ -67,6 +33,7 @@ def main():
     text = read_file("ekaterinburg.txt")
     nodes = get_nodes(text.split("\n"))
     way = get_way(row, text)
+    x = 1
 
 
 if __name__ == '__main__':
