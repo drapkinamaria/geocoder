@@ -1,4 +1,5 @@
 from files import read_file
+from Levenshtein import distance
 
 
 def get_by_beginning(needle, text):
@@ -60,12 +61,20 @@ def get_ways(text):
     return result
 
 
+def check_distances(word, array):
+    for i in array:
+        if distance(word, i) < 2:
+            return True
+    return False
+
+
 def find_variants_tier1(words, ways):
     result = []
     for way in ways.values():
         for word in words:
-            if "tags" in way and word in way["tags"].values():
-                result.append(way)
+            if "tags" in way:
+                if check_distances(word, way["tags"].values()):
+                    result.append(way)
     return result
 
 
@@ -74,8 +83,9 @@ def find_variants_tier2(words, variants):
     for variant in variants:
         all_here = True
         for word in words:
-            if word not in variant["tags"].values():
+            if not check_distances(word, variant["tags"].values()):
                 all_here = False
+                break
         if all_here:
             result.append(variant)
     return result
@@ -110,7 +120,7 @@ def print_coords(coords):
 def main():
     print("Введите данные через пробел")
     print("Пример: Екатеринбург Восточная")
-    words = input().split()
+    words = "Екатеринбург Восточная".split()  # input().split()
     text = read_file("ekaterinburg.txt")
     nodes = get_nodes(text)
     ways = get_ways(text)
