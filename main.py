@@ -117,10 +117,18 @@ def print_coords(coords):
     print("=======================================")
 
 
+def prepare_string(string):
+    result = string
+    bad_words = read_file("bad.txt").split()
+    for i in bad_words:
+        result = result.replace(i, "")
+    return result
+
+
 def main():
     print("Введите данные через пробел")
     print("Пример: Екатеринбург Восточная")
-    words = "Екатеринбург Восточная".split()  # input().split()
+    words = prepare_string("Екатеринбург ул. Восточная").split()  # input().split()
     text = read_file("ekaterinburg.txt")
     nodes = get_nodes(text)
     ways = get_ways(text)
