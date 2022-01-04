@@ -3,6 +3,29 @@ from Levenshtein import distance
 from files import read_file
 
 
+def get_district_filename(string):
+    if string == "Северо-Кавказский":
+        return "north-caucasus-fed-district-latest.osm"
+    elif string == "Южный":
+        return "south-fed-district-latest.osm"
+    elif string == "Центральный":
+        return "central-fed-district-latest.osm"
+    elif string == "Приволжский":
+        return "volga-fed-district-latest.osm"
+    elif string == "Северо-Западный":
+        return "northwestern-fed-district-latest.osm"
+    elif string == "Уральский":
+        return "ural-fed-district-latest.osm"
+    elif string == "Сибирский":
+        return "siberian-fed-district-latest.osm"
+    elif string == "Дальневосточный":
+        return "far-eastern-fed-district-latest.osm"
+    elif string == "Крымский":
+        return "crimean-fed-district-latest.osm"
+    else:
+        raise ValueError("Неверное название федерального округа.")
+
+
 def get_by_beginning(needle, text):
     index = text.find(needle)
     if index == -1:
