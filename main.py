@@ -11,9 +11,29 @@ def get_by_beginning(needle, text):
     return text[start:start + end]
 
 
+def get_data_by_district(district):
+    return ""
+
+
+def build_bad_words(array):
+    result = []
+    for i in array:
+        result.append(f"{i}.")
+        result.append(i)
+    return result
+
+
+def simplify_words(array):
+    bad_words = build_bad_words(read_file("bad_words.txt").split())
+    for i in array:
+        if i in bad_words:
+            array.remove(i)
+
+
 def get_nodes(text):
     result = {}
-    for line in text.split("\n"):
+    local_text = text[:text.find("<way")]
+    for line in local_text.split("\n"):
         try:
             i = get_by_beginning("id=\"", line)
             lat = get_by_beginning("lat=\"", line)
@@ -24,25 +44,23 @@ def get_nodes(text):
     return result
 
 
-def find_nodes(lines):
+def find_in_lines(needle, lines):
     result = []
     for i in lines:
-        if "nd ref=\"" in i:
-            result.append(get_by_beginning("nd ref=\"", i))
+        if needle in i:
+            result.append(get_by_beginning(needle, i).lower())
     return result
 
 
-def find_tags(lines):
-    result = {}
-    for i in lines:
-        if "<tag k=\"" in i:
-            value = get_by_beginning("v=\"", i)
-            if "улица" in value or "Улица" in value or \
-                    "street" in value or "Street" in value:
-                value = value.replace("улица", "").replace("Улица", "")
-                value = value.replace("street", "").replace("Street", "")
-                value = value.replace(" ", "")
-            result[get_by_beginning("<tag k=\"", i)] = value
+def simplify_tags(tags):
+    result = []
+    bad_words = build_bad_words(read_file("bad_words.txt").split())
+    for tag in tags:
+        elements = tag.split()
+        for i in elements:
+            if i in bad_words:
+                elements.remove(i)
+        result.append("_".join(elements))
     return result
 
 
@@ -55,54 +73,27 @@ def get_ways(text):
         except ValueError:
             continue
         lines = way.split("\n")[1:]
-        nodes = find_nodes(lines)
-        tags = find_tags(lines)
-        result[i] = {'nodes': nodes, 'tags': tags}
+        if len(lines) == 1:
+            continue
+        nodes = find_in_lines("nd ref=\"", lines)
+        tags = find_in_lines(" v=\"", lines)
+        new_tags = simplify_tags(tags)
+        result[i] = {'nodes': nodes, 'tags': new_tags}
     return result
 
 
-def check_distances(word, array):
-    for i in array:
-        if distance(word, i) < 2:
-            return True
-    return False
-
-
-def find_variants_tier1(words, ways):
-    result = []
-    for way in ways.values():
-        for word in words:
-            if "tags" in way:
-                if check_distances(word, way["tags"].values()):
-                    result.append(way)
+def find_best_way(words, ways):
+    result = ("", 0)
+    for key, value in ways.items():
+        i = len(set(words) & set(value["tags"]))
+        if i > result[1]:
+            result = (key, i)
     return result
 
 
-def find_variants_tier2(words, variants):
+def find_coords(way, nodes):
     result = []
-    for variant in variants:
-        all_here = True
-        for word in words:
-            if not check_distances(word, variant["tags"].values()):
-                all_here = False
-                break
-        if all_here:
-            result.append(variant)
-    return result
-
-
-def find_nodes_ids(variants, nodes):
-    result = []
-    for variant in variants:
-        for node in variant["nodes"]:
-            if node in nodes:
-                result.append(node)
-    return result
-
-
-def find_coords(variants, nodes):
-    result = []
-    for i in find_nodes_ids(variants, nodes):
+    for i in way["nodes"]:
         result.append(nodes[i])
     return result
 
@@ -117,25 +108,17 @@ def print_coords(coords):
     print("=======================================")
 
 
-def prepare_string(string):
-    result = string
-    bad_words = read_file("bad.txt").split()
-    for i in bad_words:
-        result = result.replace(i, "")
-    return result
-
-
 def main():
-    print("Введите данные через пробел")
-    print("Пример: Екатеринбург Восточная")
-    words = prepare_string("Екатеринбург ул. Восточная").split()  # input().split()
-    text = read_file("ekaterinburg.txt")
-    nodes = get_nodes(text)
-    ways = get_ways(text)
-    vars_tier1 = find_variants_tier1(words, ways)
-    vars_tier2 = find_variants_tier2(words, vars_tier1)
-    final_vars = vars_tier2[:5] if vars_tier2 else vars_tier1[:5]
-    coords = find_coords(final_vars, nodes)
+    data = read_file(r".\districts\crimean-fed-district-latest.osm")  # get_data_by_district("ds")
+    words = "г. Екатеринбург Льва_Толстого улица".lower().split()
+    simplify_words(words)
+    nodes = get_nodes(data)
+    ways = get_ways(data)
+    variant = find_best_way(words, ways)
+    if variant == ("", 0):
+        raise ValueError("Лушего пути нет. Ошибка ввода.")
+
+    coords = find_coords(ways[variant[0]], nodes)
     print_coords(coords)
 
 
