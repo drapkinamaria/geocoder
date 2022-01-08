@@ -1,3 +1,4 @@
+import json
 import time
 import urllib.request
 import bz2
@@ -6,6 +7,12 @@ import bz2
 def read_file(filename):
     with open(filename, 'r', encoding='utf-8') as file:
         return file.read()
+
+
+def save_to_file(filename, *args):
+    with open(f"./results/{filename}", 'w', encoding='utf-8') as file:
+        for i in args:
+            file.write(i + "\n")
 
 
 def download_district(district):

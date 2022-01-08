@@ -1,0 +1,4 @@
+crimean-fed-district-latest.osm
+цуп ук яцу афцу фцывс
+{"1": {"lat": "12412312321", "lon": "adwadqwdqdq"}, "2": {"lat": "12412312321", "lon": "adwadqwdqdq"}}
+

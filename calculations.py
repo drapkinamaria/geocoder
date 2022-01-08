@@ -1,29 +1,24 @@
 from Levenshtein import distance
 
-from files import read_file
 
-
-def get_district_filename(string):
-    if string == "Северо-Кавказский":
-        return "north-caucasus-fed-district-latest.osm"
-    elif string == "Южный":
-        return "south-fed-district-latest.osm"
-    elif string == "Центральный":
-        return "central-fed-district-latest.osm"
-    elif string == "Приволжский":
-        return "volga-fed-district-latest.osm"
-    elif string == "Северо-Западный":
-        return "northwestern-fed-district-latest.osm"
-    elif string == "Уральский":
-        return "ural-fed-district-latest.osm"
-    elif string == "Сибирский":
-        return "siberian-fed-district-latest.osm"
-    elif string == "Дальневосточный":
-        return "far-eastern-fed-district-latest.osm"
-    elif string == "Крымский":
-        return "crimean-fed-district-latest.osm"
-    else:
-        raise ValueError("Неверное название федерального округа.")
+def get_district_filename():
+    districts = {
+        "северо-кавказский": "north-caucasus-fed-district-latest.osm",
+        "южный": "south-fed-district-latest.osm",
+        "центральный": "central-fed-district-latest.osm",
+        "приволжский": "volga-fed-district-latest.osm",
+        "северо-западный": "northwestern-fed-district-latest.osm",
+        "уральский": "ural-fed-district-latest.osm",
+        "сибирский": "siberian-fed-district-latest.osm",
+        "дальневосточный": "far-eastern-fed-district-latest.osm",
+        "крымский": "crimean-fed-district-latest.osm"
+    }
+    print(f"Федеральные округа: {' '.join(districts.keys())}")
+    while True:
+        try:
+            return districts[input("Введите федеральный округ: ").lower()]
+        except KeyError:
+            print("Неверное название федерального округа. Попробуйте еще раз.")
 
 
 def get_by_beginning(needle, text):
@@ -43,8 +38,7 @@ def build_bad_words(array):
     return result
 
 
-def simplify_words(array):
-    bad_words = build_bad_words(read_file("bad_words.txt").split())
+def simplify_words(array, bad_words):
     for i in array:
         if i in bad_words:
             array.remove(i)
@@ -72,9 +66,8 @@ def find_in_lines(needle, lines):
     return result
 
 
-def simplify_tags(tags):
+def simplify_tags(tags, bad_words):
     result = []
-    bad_words = build_bad_words(read_file("bad_words.txt").split())
     for tag in tags:
         elements = tag.split()
         for i in elements:
@@ -84,7 +77,7 @@ def simplify_tags(tags):
     return result
 
 
-def get_ways(text):
+def get_ways(text, bad_words):
     result = {}
     local_text = text[text.find("<way "):text.rfind("</way>")]
     for way in local_text.split("</way>"):
@@ -97,7 +90,7 @@ def get_ways(text):
             continue
         nodes = find_in_lines("nd ref=\"", lines)
         tags = find_in_lines(" v=\"", lines)
-        new_tags = simplify_tags(tags)
+        new_tags = simplify_tags(tags, bad_words)
         result[i] = {'nodes': nodes, 'tags': new_tags}
     return result
 
@@ -121,7 +114,7 @@ def find_best_way(words, ways):
 
 
 def find_coords(way, nodes):
-    result = []
-    for i in way["nodes"]:
-        result.append(nodes[i])
+    result = {}
+    for i, v in enumerate(way["nodes"]):
+        result[f"{i+1}"] = nodes[v]
     return result
