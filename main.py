@@ -21,7 +21,7 @@ def main():
     data = read_file(f".\\districts\\{district}")
     print("\rПолучение узлов.  [2/3]", end="")
     nodes = get_nodes(data)
-    print("\rПолучение путей.  [3/3]")
+    print("\rПолучение путей.  [3/3]", end="")
     ways = get_ways(data, bad_words)
 
     variant = find_best_way(words, ways)
