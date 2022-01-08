@@ -10,7 +10,7 @@ def read_file(filename):
 
 
 def save_to_file(filename, *args):
-    Path('./results').mkdir(parents=True, exist_ok=True)
+    Path("./results").mkdir(parents=True, exist_ok=True)
     with open(f"./results/{filename}", 'w', encoding='utf-8') as file:
         for i in args:
             file.write(i + "\n")
@@ -18,7 +18,7 @@ def save_to_file(filename, *args):
 
 def download_district(district):
     url = f"http://download.geofabrik.de/russia/{district}.bz2"
-    Path('./districts').mkdir(parents=True, exist_ok=True)
+    Path("./districts").mkdir(parents=True, exist_ok=True)
     try:
         urllib.request.urlretrieve(url, f"./districts/{district}.bz2")
     except Exception:

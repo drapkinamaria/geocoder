@@ -14,11 +14,11 @@ def main():
     simplify_words(words, bad_words)
     save_to_json = input("Сохранить результаты (да/нет): ")
 
-    if not exists(f".\\districts\\{district}"):
+    if not exists(f"./districts/{district}"):
         print("\rОкруг не найден. Идет скачивание.", end="")
         download_district(district)
     print("\rЧтение файла.     [1/3]", end="")
-    data = read_file(f".\\districts\\{district}")
+    data = read_file(f"./districts/{district}")
     print("\rПолучение узлов.  [2/3]", end="")
     nodes = get_nodes(data)
     print("\rПолучение путей.  [3/3]", end="")
