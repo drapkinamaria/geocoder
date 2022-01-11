@@ -1,3 +1,4 @@
+import json
 import time
 import urllib.request
 import bz2
@@ -7,6 +8,16 @@ from pathlib import Path
 def read_file(filename):
     with open(filename, 'r', encoding='utf-8') as file:
         return file.read()
+
+
+def save_to_json(filename, data):
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
+
+
+def json_to_dict(filename):
+    with open(filename) as f:
+        return json.load(f)
 
 
 def save_to_file(filename, *args):

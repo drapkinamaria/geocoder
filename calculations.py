@@ -1,4 +1,7 @@
+from os.path import exists
+from pathlib import Path
 from Levenshtein import distance
+from files import json_to_dict, read_file, save_to_json, download_district
 
 
 def get_district_filename():
@@ -19,6 +22,32 @@ def get_district_filename():
             return districts[input("Введите федеральный округ: ").lower()]
         except KeyError:
             print("Неверное название федерального округа. Попробуйте еще раз.")
+
+
+def process_nodes_and_ways(district, bad_words):
+    filename = district.split(".")[0]
+    nodes_path = f"./processed_data/{filename}_nodes.txt"
+    ways_path = f"./processed_data/{filename}_ways.txt"
+    Path("./processed_data").mkdir(parents=True, exist_ok=True)
+    try:
+        return json_to_dict(nodes_path), json_to_dict(ways_path)
+    except Exception:
+        try:
+            data = read_file(f"./districts/{district}")
+            nodes = get_nodes(data)
+            ways = get_ways(data, bad_words)
+            save_to_json(nodes_path, nodes)
+            save_to_json(ways_path, ways)
+            return nodes, ways
+        except Exception:
+            if not exists(f"./districts/{district}"):
+                download_district(district)
+            data = read_file(f"./districts/{district}")
+            nodes = get_nodes(data)
+            ways = get_ways(data, bad_words)
+            save_to_json(nodes_path, nodes)
+            save_to_json(ways_path, ways)
+            return nodes, ways
 
 
 def get_by_beginning(needle, text):
