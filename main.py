@@ -12,7 +12,7 @@ def main():
     words = input("Введите место: ").lower().split()
     simplify_words(words, bad_words)
     save = input("Сохранить результаты (да/нет): ")
-    
+
     nodes, ways = process_nodes_and_ways(district, bad_words)
 
     variant = find_best_way(words, ways)
