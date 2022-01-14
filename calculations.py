@@ -4,50 +4,25 @@ from Levenshtein import distance
 from files import json_to_dict, read_file, save_to_json, download_district
 
 
-def get_district_filename():
-    districts = {
-        "северо-кавказский": "north-caucasus-fed-district-latest.osm",
-        "южный": "south-fed-district-latest.osm",
-        "центральный": "central-fed-district-latest.osm",
-        "приволжский": "volga-fed-district-latest.osm",
-        "северо-западный": "northwestern-fed-district-latest.osm",
-        "уральский": "ural-fed-district-latest.osm",
-        "сибирский": "siberian-fed-district-latest.osm",
-        "дальневосточный": "far-eastern-fed-district-latest.osm",
-        "крымский": "crimean-fed-district-latest.osm"
-    }
-    print(f"Федеральные округа: {' '.join(districts.keys())}")
-    while True:
-        try:
-            return districts[input("Введите федеральный округ: ").lower()]
-        except KeyError:
-            print("Неверное название федерального округа. Попробуйте еще раз.")
-
-
 def process_nodes_and_ways(district, bad_words):
     filename = district.split(".")[0]
     nodes_path = f"./processed_data/{filename}_nodes.txt"
     ways_path = f"./processed_data/{filename}_ways.txt"
     Path("./processed_data").mkdir(parents=True, exist_ok=True)
-    try:
-        return json_to_dict(nodes_path), json_to_dict(ways_path)
-    except Exception:
-        try:
-            data = read_file(f"./districts/{district}")
-            nodes = get_nodes(data)
-            ways = get_ways(data, bad_words)
-            save_to_json(nodes_path, nodes)
-            save_to_json(ways_path, ways)
-            return nodes, ways
-        except Exception:
-            if not exists(f"./districts/{district}"):
-                download_district(district)
-            data = read_file(f"./districts/{district}")
-            nodes = get_nodes(data)
-            ways = get_ways(data, bad_words)
-            save_to_json(nodes_path, nodes)
-            save_to_json(ways_path, ways)
-            return nodes, ways
+
+    if exists(nodes_path) and exists(ways_path):
+        nodes = json_to_dict(nodes_path)
+        ways = json_to_dict(ways_path)
+    else:
+        if not exists(f"./districts/{district}"):
+            download_district(district)
+        data = read_file(f"./districts/{district}")
+        nodes = get_nodes(data)
+        ways = get_ways(data, bad_words)
+        save_to_json(nodes_path, nodes)
+        save_to_json(ways_path, ways)
+
+    return nodes, ways
 
 
 def get_by_beginning(needle, text):
