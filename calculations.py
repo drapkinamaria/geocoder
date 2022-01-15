@@ -1,6 +1,8 @@
 from os.path import exists
 from pathlib import Path
 from Levenshtein import distance
+from geopy.geocoders import Nominatim
+
 from files import json_to_dict, read_file, save_to_json, download_district
 
 
@@ -122,3 +124,9 @@ def find_coords(way, nodes):
     for i, v in enumerate(way["nodes"]):
         result[f"{i+1}"] = nodes[v]
     return result
+
+
+def find_with_api(address):
+    geolocator = Nominatim(user_agent="my-application@gmail.com")
+    location = geolocator.geocode(address)
+    return {"1": {"lat": location.latitude, "lon": location.longitude}}

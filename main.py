@@ -1,9 +1,8 @@
 import argparse
 import json
-import sys
 from datetime import datetime
 from calculations import simplify_words, find_best_way, find_coords, \
-    build_bad_words, process_nodes_and_ways
+    build_bad_words, process_nodes_and_ways, find_with_api
 from display import print_coords
 from files import read_file, save_to_file
 
@@ -11,9 +10,11 @@ from files import read_file, save_to_file
 def prepare_parser(districts):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "district", help=f"Choose one district: {' '.join(districts)}",
+        "-d", help=f"Choose one district: {' '.join(districts)}",
         type=str)
     parser.add_argument("-s", help="Save result?", default=False,
+                        action="store_true")
+    parser.add_argument("--use_overpass", help="Use overpass?", default=False,
                         action="store_true")
     parser.add_argument("data", help="data", nargs="+")
     return parser
@@ -31,22 +32,27 @@ def main():
         "дальневосточный": "far-eastern-fed-district-latest.osm",
         "крымский": "crimean-fed-district-latest.osm"
     }
-    bad_words = build_bad_words(read_file("bad_words.txt").split())
     parser = prepare_parser(districts)
     args = parser.parse_args()
-    try:
-        district = districts[args.district.lower()]
-    except KeyError as k:
-        raise KeyError("Неверное название региона.")
     words = [x.lower() for x in args.data]
+    bad_words = build_bad_words(read_file("bad_words.txt").split())
     simplify_words(words, bad_words)
 
-    nodes, ways = process_nodes_and_ways(district, bad_words)
+    if args.use_overpass:
+        coords = find_with_api(" ".join(words))
+        district = "None"
+    else:
+        try:
+            district = districts[args.d.lower()]
+        except KeyError:
+            raise KeyError("Неверное название региона.")
 
-    variant = find_best_way(words, ways)
-    if variant == ("", 0):
-        raise ValueError("Лушего пути нет. Ошибка ввода.")
-    coords = find_coords(ways[variant[0]], nodes)
+        nodes, ways = process_nodes_and_ways(district, bad_words)
+
+        variant = find_best_way(words, ways)
+        if variant == ("", 0):
+            raise ValueError("Лушего пути нет. Ошибка ввода.")
+        coords = find_coords(ways[variant[0]], nodes)
     print_coords(coords)
 
     if args.s:
@@ -60,4 +66,3 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         print(e)
-        sys.exit(1)
