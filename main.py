@@ -50,7 +50,7 @@ def main():
         nodes, ways = process_nodes_and_ways(district, bad_words)
 
         variant = find_best_way(words, ways)
-        if variant == ("", 0):
+        if variant == ({}, 0):
             raise ValueError("Лушего пути нет. Ошибка ввода.")
         coords = find_coords(ways[variant[0]], nodes)
     print_coords(coords)

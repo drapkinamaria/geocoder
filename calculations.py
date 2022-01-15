@@ -1,8 +1,6 @@
 from os.path import exists
 from pathlib import Path
-from Levenshtein import distance
 from geopy.geocoders import Nominatim
-
 from files import json_to_dict, read_file, save_to_json, download_district
 
 
@@ -101,21 +99,12 @@ def get_ways(text, bad_words):
     return result
 
 
-def count_intersections(first, second):
-    result = 0
-    for i in first:
-        for j in second:
-            if distance(i, j) <= 1:
-                result += 1
-    return result
-
-
 def find_best_way(words, ways):
-    result = ("", 0)
-    for key, value in ways.items():
-        i = count_intersections(words, value["tags"])
+    result = ({}, 0)
+    for v in ways.values():
+        i = len(list(set(words) & set(v["tags"])))
         if i > result[1]:
-            result = (key, i)
+            result = (v, i)
     return result
 
 
