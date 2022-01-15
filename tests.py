@@ -64,8 +64,6 @@ class TestCalculations(unittest.TestCase):
     def test_geopy(self):
         self.assertEqual({'1': {'lat': 56.6811951, 'lon': 48.07362542533522}},
                          find_with_api("Москва Кузнецово 3а"))
-        self.assertEqual({'1': {'lat': 44.5956716, 'lon': 33.5156945}},
-                         find_with_api("Севастополь Льва Толстого"))
         self.assertEqual({'1': {'lat': 56.840488, 'lon': 60.61649048816038}},
                          find_with_api("Ленина 51 Екатеринбург"))
         self.assertEqual({'1': {'lat': 56.7728553, 'lon': 60.5455228}},
