@@ -1,2 +1,1 @@
-Levenshtein~=0.16.0
 geopy~=2.2.0

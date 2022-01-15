@@ -2,6 +2,7 @@ from os.path import exists
 from pathlib import Path
 from geopy.geocoders import Nominatim
 from files import json_to_dict, read_file, save_to_json, download_district
+from suffix_tree import SuffixTree
 
 
 def process_nodes_and_ways(district, bad_words):
@@ -95,16 +96,31 @@ def get_ways(text, bad_words):
         nodes = find_in_lines("nd ref=\"", lines)
         tags = find_in_lines(" v=\"", lines)
         new_tags = simplify_tags(tags, bad_words)
-        result[i] = {'nodes': nodes, 'tags': new_tags}
+        result[i] = {"nodes": nodes, "tags": new_tags}
+    return result
+
+
+def find_intersections(words, tree):
+    result = 0
+    for i in words:
+        if tree.has_substring(i):
+            result += 1
+    return result
+
+
+def make_trees(ways):
+    result = {}
+    for k, v in ways.items():
+        result[k] = SuffixTree(" ".join(v["tags"]))
     return result
 
 
 def find_best_way(words, ways):
     result = ({}, 0)
-    for v in ways.values():
-        i = len(list(set(words) & set(v["tags"])))
+    for k, v in ways.items():
+        i = find_intersections(words, v)
         if i > result[1]:
-            result = (v, i)
+            result = (k, i)
     return result
 
 

@@ -1,11 +1,7 @@
 import unittest
 from calculations import *
 
-strings = [
-    ("Вертолет", "Вертолет"),
-    ("Машина", "Я"),
-    ("Левенштейна", '')
-]
+
 texts = [
     '''<node id="2736761063" version="1" timestamp="2014-03-23T14:48:14Z" ''' +
     '''lat="45.4074454" lon="35.8552273"/>\n<node id="2736761065" version=''' +
@@ -31,11 +27,6 @@ bad_words = build_bad_words(read_file("bad_words.txt").split())
 
 
 class TestCalculations(unittest.TestCase):
-
-    def test_distance(self):
-        self.assertEqual(0, distance(strings[0][0], strings[0][1]))
-        self.assertEqual(6, distance(strings[1][0], strings[1][1]))
-        self.assertEqual(11, distance(strings[2][0], strings[2][1]))
 
     def test_getting_nodes(self):
         self.assertEqual(

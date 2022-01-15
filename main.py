@@ -2,7 +2,7 @@ import argparse
 import json
 from datetime import datetime
 from calculations import simplify_words, find_best_way, find_coords, \
-    build_bad_words, process_nodes_and_ways, find_with_api
+    build_bad_words, process_nodes_and_ways, find_with_api, make_trees
 from display import print_coords
 from files import read_file, save_to_file
 
@@ -33,7 +33,7 @@ def main():
         "крымский": "crimean-fed-district-latest.osm"
     }
     parser = prepare_parser(districts)
-    args = parser.parse_args()
+    args = parser.parse_args(["-d", "крымский", "льва_толстого"])
     words = [x.lower() for x in args.data]
     bad_words = build_bad_words(read_file("bad_words.txt").split())
     simplify_words(words, bad_words)
@@ -48,8 +48,8 @@ def main():
             raise KeyError("Неверное название региона.")
 
         nodes, ways = process_nodes_and_ways(district, bad_words)
-
-        variant = find_best_way(words, ways)
+        ways_trees = make_trees(ways)
+        variant = find_best_way(words, ways_trees)
         if variant == ({}, 0):
             raise ValueError("Лушего пути нет. Ошибка ввода.")
         coords = find_coords(ways[variant[0]], nodes)
